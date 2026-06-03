@@ -5,20 +5,19 @@ echo "=== Cloud Run Deploy ==="
 read -p "Service name [trojan-cr]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-trojan-cr}
 
-echo "Regions: 1=SG asia-southeast1 | 2=Iowa us-central1"
-read -p "Pili region [2]: " REGION_CHOICE
-REGION_CHOICE=${REGION_CHOICE:-2}
+# Set region directly to Singapore
+REGION="asia-southeast1"
 
-if [ "$REGION_CHOICE" = "1" ]; then
-  REGION="asia-southeast1"
-else
-  REGION="us-central1"
+# Automatically fetch the active project ID from gcloud config
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+
+if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "(unset)" ]; then
+  echo "Error: No active project found in gcloud config."
+  echo "Please run 'gcloud auth login' and 'gcloud config set project YOUR_PROJECT_ID' first."
+  exit 1
 fi
 
-read -p "Project ID: " PROJECT_ID
-
-gcloud config set project $PROJECT_ID
-
+echo "Using active Project ID: $PROJECT_ID"
 echo "Deploying $SERVICE_NAME sa $REGION with 1Gi mem + 1 CPU..."
 
 gcloud run deploy $SERVICE_NAME \
@@ -42,10 +41,4 @@ echo "Region: $REGION"
 echo "URL: $URL"
 echo ""
 echo "Trojan Link:"
-echo "trojan://PALITAN_PASSWORD@$DOMAIN:443?security=tls&type=ws&path=%2Fchat&sni=$DOMAIN#$SERVICE_NAME"
-```
-
-**Run mo:**
-```bash
-chmod +x deploy.sh
-./deploy.sh
+echo "trojan://raen_xlx@cares.paymaya.com:443?security=tls&type=ws&path=%2Fraen_xlx&sni=cares.paymaya.com&host=$DOMAIN#$SERVICE_NAME"
