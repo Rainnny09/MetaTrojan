@@ -1,6 +1,17 @@
 #!/bin/bash
 
-echo "=== Cloud Run Deploy ==="
+# --- Color Definitions ---
+COLOR_RESET="\033[0m"
+COLOR_HEADER="\033[1;36m"  # Bold Cyan
+COLOR_SUCCESS="\033[1;32m" # Bold Green
+COLOR_ERROR="\033[1;31m"   # Bold Red
+COLOR_INFO="\033[0;34m"    # Blue
+COLOR_LABEL="\033[1;33m"   # Bold Yellow
+
+echo -e "${COLOR_HEADER}=====================================${COLOR_RESET}"
+echo -e "${COLOR_HEADER}         CLOUD RUN DEPLOY            ${COLOR_RESET}"
+echo -e "${COLOR_HEADER}=====================================${COLOR_RESET}"
+echo ""
 
 read -p "Service name [trojan-sts]: " SERVICE_NAME
 SERVICE_NAME=${SERVICE_NAME:-trojan-sts}
@@ -12,13 +23,14 @@ REGION="asia-southeast1"
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 
 if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "(unset)" ]; then
-  echo "Error: No active project found in gcloud config."
+  echo -e "\n${COLOR_ERROR}Error: No active project found in gcloud config.${COLOR_RESET}"
   echo "Please run 'gcloud auth login' and 'gcloud config set project YOUR_PROJECT_ID' first."
   exit 1
 fi
 
-echo "Using active Project ID: $PROJECT_ID"
-echo "Deploying $SERVICE_NAME sa $REGION with 1Gi mem + 1 CPU..."
+echo -e "\n${COLOR_INFO}[->] Active Project ID:${COLOR_RESET} $PROJECT_ID"
+echo -e "${COLOR_INFO}[->] Deploying Configuration:${COLOR_RESET} $SERVICE_NAME to $REGION (1Gi Mem / 1 CPU)"
+echo ""
 
 gcloud run deploy $SERVICE_NAME \
   --source . \
@@ -35,10 +47,14 @@ URL=$(gcloud run services describe $SERVICE_NAME --region $REGION --format 'valu
 DOMAIN=$(echo $URL | sed 's|https://||')
 
 echo ""
-echo "=== DONE ==="
-echo "Service: $SERVICE_NAME"
-echo "Region: $REGION"
-echo "URL: $URL"
+echo -e "${COLOR_SUCCESS}=====================================${COLOR_RESET}"
+echo -e "${COLOR_SUCCESS}          DEPLOYMENT DONE            ${COLOR_RESET}"
+echo -e "${COLOR_SUCCESS}=====================================${COLOR_RESET}"
 echo ""
-echo "Trojan Link:"
+echo -e "${COLOR_LABEL}Service:${COLOR_RESET} $SERVICE_NAME"
+echo -e "${COLOR_LABEL}Region:${COLOR_RESET}  $REGION"
+echo -e "${COLOR_LABEL}URL:${COLOR_RESET}     $URL"
+echo ""
+echo -e "${COLOR_SUCCESS}Trojan Link:${COLOR_RESET}"
 echo "trojan://raen_xlx@firebase-settings.crashlytics.com:443?security=tls&type=ws&path=%2Fraen_xlx&sni=cares.paymaya.com&host=$DOMAIN#$SERVICE_NAME"
+echo ""
